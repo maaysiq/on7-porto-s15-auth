@@ -3,6 +3,7 @@ const tarefas = require('../models/tarefas');
 const SECRET = process.env.SECRET;
 const jwt = require('jsonwebtoken');
 
+
 const getAll = (req, res) => {
   const authHeader = req.get('authorization');
 
@@ -28,8 +29,19 @@ const getAll = (req, res) => {
 
 const getById = (req, res) => {
   const id = req.params.id;
-  //Find sempre retorna uma lista
-  //FindOne retorna um unico documento
+  
+  const authHeader = req.get("authorization");
+  if (!authHeader) {
+    return res.status(401).send("Kd os header parça");
+  }
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, SECRET, function (erro) {
+    if (erro) {
+      return res.status(403).send("Nope");
+    }
+  });
+
   tarefas.find({ id }, function(err, tarefas){
     if(err) {
       res.status(500).send({ message: err.message })
@@ -40,9 +52,19 @@ const getById = (req, res) => {
 };
 
 const postTarefa = (req, res) => {
-  console.log(req.body)
-
   let tarefa = new tarefas(req.body)
+
+  const authHeader = req.get("authorization");
+  if (!authHeader) {
+    return res.status(401).send("Kd os header parça");
+  }
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, SECRET, function (erro) {
+    if (erro) {
+      return res.status(403).send("Nope!");
+    }
+  });
 
   tarefa.save(function(err){
     if(err) {
@@ -56,8 +78,18 @@ const postTarefa = (req, res) => {
 const deleteTarefa = (req, res) => {
   const id = req.params.id;
 
-  //deleteMany remove mais de um registro
-  //deleteOne remove apenas um registro
+  const authHeader = req.get("authorization");
+  if (!authHeader) {
+    return res.status(401).send("Kd os header parça");
+  }
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, SECRET, function (erro) {
+    if (erro) {
+      return res.status(403).send("Nope!");
+    }
+  });
+
   tarefas.find({ id }, function(err, tarefa){
     if(tarefa.length > 0){
       tarefas.deleteMany({ id }, function(err){
@@ -82,7 +114,18 @@ const deleteTarefa = (req, res) => {
 };
 
 const deleteTarefaConcluida = (req, res) => {
-  //Deleta quando concluido = true
+  const authHeader = req.get("authorization");
+  if (!authHeader) {
+    return res.status(401).send("Quer fazer alguma coisa?");
+  }
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, SECRET, function (erro) {
+    if (erro) {
+      return res.status(403).send("Não deu!");
+    }
+  });
+
   try {
     tarefas.deleteMany({ concluido: true }, function (err) {
         if (!err) {
@@ -98,12 +141,22 @@ const deleteTarefaConcluida = (req, res) => {
 const putTarefa = (req, res) => {
   const id = req.params.id;
 
+  const authHeader = req.get("authorization");
+  if (!authHeader) {
+    return res.status(401).send("Quer fazer alguma coisa?");
+  }
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, SECRET, function (erro) {
+    if (erro) {
+      return res.status(403).send("Não deu!");
+    }
+  });
+
+
   tarefas.find({ id }, function(err, tarefa){
     if(tarefa.length> 0){
-      //faz o update apenas para quem respeitar o id passado no parametro
-      // set são os valores que serão atualizados
-      //UpdateMany atualiza vários registros de uma unica vez
-      //UpdateOne atualiza um único registro por vez
+  
 
       tarefas.updateMany({ id }, { $set : req.body }, function (err) {
         if (err) {
